@@ -3,6 +3,7 @@ package co.yml.rampart
 import android.content.Context
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -13,6 +14,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +33,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.yml.rampart.MainActivity.Companion.TAG
 import coil.compose.AsyncImage
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.label.ImageLabeling
@@ -42,6 +46,9 @@ import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 
 class MainActivity : ComponentActivity() {
 
+    companion object{
+        const val TAG = "DETECTED STRING"
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -59,6 +66,8 @@ fun HomeScreen(context: Context) {
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var detectedObjects by remember { mutableStateOf("") }
     var detectedStr by remember { mutableStateOf("") }
+    var finalTxt by remember { mutableStateOf("") }
+
 
     val singlePhotoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -66,6 +75,7 @@ fun HomeScreen(context: Context) {
             selectedImageUri = uri
             detectedObjects = ""
             detectedStr = ""
+            finalTxt = ""
             if (uri != null) {
                 val image = InputImage.fromFilePath(context, uri)
                 val labeler = ImageLabeling.getClient(ImageLabelerOptions.DEFAULT_OPTIONS)
@@ -76,7 +86,8 @@ fun HomeScreen(context: Context) {
                             val confidence = label.confidence
                             val index = label.index
                             println("Found $text with confidence $confidence")
-                            detectedObjects = "$detectedObjects\n$text-$confidence"
+                            detectedObjects = "$detectedObjects\n$text - ${confidence.toString().percent()}"
+//                            detectedObjects = "$detectedObjects\n$text-$confidence"
                         }
                     }
                     .addOnFailureListener { e -> e.printStackTrace() }
@@ -87,17 +98,31 @@ fun HomeScreen(context: Context) {
                         for (block in visionText.textBlocks) {
                             val boundingBox = block.boundingBox
                             val cornerPoints = block.cornerPoints
+                            var description = ""
+                            Log.d(TAG, "Bounding box : $boundingBox")
                             val text = block.text
+                            Log.d(TAG, "Block is : $block")
+                            Log.d(TAG, "LIne inside Block is : ${block.lines}")
                             for (line in block.lines) {
+                                var sentence = ""
+                                Log.d(TAG, "Line is : $line")
                                 for (element in line.elements) {
+                                    Log.d(TAG, "Element is : $element")
+                                    var word = ""
                                     for (symbol in element.symbols) {
+                                        word += symbol.text
                                         println(symbol.text)
                                         detectedStr += symbol.text
                                     }
+                                    sentence += " $word"
+                                    Log.d(TAG, "word is : $word")
                                 }
+                                Log.d(TAG, "Sentence is : $sentence")
+                                description += "$sentence\n"
                             }
+                            Log.d(TAG, "Description is : $description")
+                           finalTxt += description
                         }
-
                     }
                     .addOnFailureListener {
 
@@ -111,6 +136,7 @@ fun HomeScreen(context: Context) {
 
     Column(
         modifier = Modifier
+            .verticalScroll(rememberScrollState())
             .fillMaxWidth()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -146,7 +172,7 @@ fun HomeScreen(context: Context) {
         )
 
         Text(
-            text = detectedStr,
+            text = finalTxt,
             style = TextStyle(
                 color = Color.Black,
                 fontSize = 16.sp,
@@ -181,4 +207,10 @@ private fun processTextBlock(result: Text) {
             }
         }
     }
+}
+
+fun String.percent(): String {
+    if (this.isEmpty()) return ""
+    return this.take(4).drop(2)+"%"
+
 }

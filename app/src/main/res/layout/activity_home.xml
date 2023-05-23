@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:gravity="center_vertical"
+    android:layout_gravity="center_vertical"
+    android:layout_height="match_parent">
+
+    <Button
+        android:id="@+id/bt_car"
+        android:layout_marginHorizontal="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Car Detection"
+        android:textAllCaps="false"
+        tools:layout_editor_absoluteX="161dp"
+        tools:layout_editor_absoluteY="212dp" />
+
+    <Button
+        android:id="@+id/bt_form"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="30dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Form Validation"
+        android:textAllCaps="false"
+        tools:layout_editor_absoluteX="156dp"
+        tools:layout_editor_absoluteY="451dp" />
+</LinearLayout>
