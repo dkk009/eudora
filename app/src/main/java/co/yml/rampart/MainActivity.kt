@@ -137,7 +137,7 @@ fun HomeScreen(context: Context) {
         Text(
             text = detectedObjects,
             style = TextStyle(
-                color = Color.Blue,
+                color = Color.DarkGray,
                 fontSize = 16.sp,
                 fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.W800,
